@@ -9,7 +9,7 @@ Fraction::Fraction()
 }
 Fraction::Fraction(int numerator, int denominator) : _numerator(numerator), _denominator(denominator)
 {
-    //handle 0 denominator
+    // handle 0 denominator
     if (_denominator == 0)
     {
         throw std::invalid_argument("Denominator cannot be 0!");
@@ -20,23 +20,25 @@ Fraction::Fraction(int numerator, int denominator) : _numerator(numerator), _den
         this->_denominator = 1;
         return;
     }
-    //both ints are negative
-    if(_numerator < 0 && _denominator < 0){
+    // both ints are negative
+    if (_numerator < 0 && _denominator < 0)
+    {
         _numerator *= (-1);
         _denominator *= (-1);
         fractionReduction();
         return;
     }
-    if(_denominator<0){
-        //move the negative 1 multiplier to the numerator
+    if (_denominator < 0)
+    {
+        // move the negative 1 multiplier to the numerator
         _numerator *= (-1);
         _denominator *= (-1);
         fractionReduction();
-        return;    
+        return;
     }
     fractionReduction(); // reduce fraction to minimal value
 };
-Fraction::Fraction(double decimalVal)
+Fraction::Fraction(float decimalVal)
 {
     this->_numerator = decimalVal * 1000;
     this->_denominator = 1000;
@@ -69,11 +71,14 @@ int gcd_calc(int &a, int &b)
 void Fraction::fractionReduction()
 {
     int tmp_numerator = this->_numerator;
-    if (tmp_numerator < 0 ){ tmp_numerator *= (-1);}
+    if (tmp_numerator < 0)
+    {
+        tmp_numerator *= (-1);
+    }
     // std::cout << "tmp_numerator: " << tmp_numerator << std::endl;
     // std::cout << "_numerator: " << this->_numerator << std::endl;
     int tmp_denominator = this->_denominator;
-    
+
     int gcd_res = gcd_calc(tmp_numerator, tmp_denominator);
     // std::cout << "gcd of fraction is " << gcd_res << std::endl;
     this->_numerator = this->_numerator / gcd_res;
@@ -122,7 +127,13 @@ Fraction Fraction::operator-(const Fraction &other) const
     return Fraction((new_numerator_1 - new_numerator_2), new_denominator);
 }
 Fraction Fraction::operator*(const Fraction &other) const { return Fraction((this->_numerator * other._numerator), (this->_denominator * other._denominator)); }
-Fraction Fraction::operator/(const Fraction &other) const { return Fraction((this->_numerator * other._denominator), (this->_denominator * other._numerator)); }
+Fraction Fraction::operator/(const Fraction &other) const 
+{ 
+    if(other._numerator == 0){
+        throw std::runtime_error("division by 0");
+    }
+    return Fraction((this->_numerator * other._denominator), (this->_denominator * other._numerator)); 
+    }
 
 // prefix
 Fraction &Fraction::operator++()
@@ -153,13 +164,32 @@ Fraction Fraction::operator--(int dummy_flag)
 Fraction Fraction::operator+(float decimalNum) const { return *this + Fraction(decimalNum); }
 Fraction Fraction::operator-(float decimalNum) const { return *this - Fraction(decimalNum); }
 Fraction Fraction::operator*(float decimalNum) const { return *this * Fraction(decimalNum); }
-Fraction Fraction::operator/(float decimalNum) const { return *this / Fraction(decimalNum); }
+Fraction Fraction::operator/(float decimalNum) const 
+{ 
+    if(decimalNum == 0) throw std::runtime_error("Division by 0");
+    return *this / Fraction(decimalNum); 
+    }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // comparison operators between Fractions
-bool Fraction::operator==(const Fraction &other) const { return ((this->_numerator == other._numerator) && (this->_denominator == other._denominator)); }
+bool Fraction::operator==(const Fraction &other) const 
+{ 
+    float _fraction1 = ((float)this->_numerator / this->_denominator) * 1000;
+    _fraction1 = (int)_fraction1;
+    _fraction1 = (float)_fraction1/1000;
+    float _fraction2 = ((float)other._numerator / other._denominator) * 1000;
+    _fraction2 = (int)_fraction2;
+    _fraction2 = (float)_fraction2/1000;
+    // double _rounding = (double)std::abs(_fraction1 - _fraction2);
+    // if(_rounding> 0.001){
+    //     std::cout<< "rounding: " << _rounding << std::endl;
+    // }
+    return(std::abs(_fraction1 - _fraction2) <= 0.001);
+    // return (_rounding<=(float)0.001);
+    // return(_fraction1 == _fraction2);
+}
 bool Fraction::operator>(const Fraction &other) const
 {
     float fraction_1 = this->fractionToFloat(),
@@ -194,7 +224,6 @@ bool operator>(const float decimalNum, const Fraction &_fraction) { return _frac
 bool operator>=(const float decimalNum, const Fraction &_fraction) { return _fraction <= decimalNum; }
 bool operator<=(const float decimalNum, const Fraction &_fraction) { return _fraction >= decimalNum; }
 
-
 // friend IO operators for a single fraction
 std::ostream &operator<<(std::ostream &output, const Fraction &_fraction)
 {
@@ -209,6 +238,35 @@ static std::istream &checkInput(std::istream &input, int expectedInteger)
 
 std::istream &operator>>(std::istream &input, Fraction &_fraction)
 {
-    int new_numerator, new_denominator;
+    // int x = '/';
+    // std::cout<< "x:" << x << std::endl;
+    if (input.peek() == EOF)
+    {
+        throw std::runtime_error("no input detected");
+    }
+    int new_numerator;
+    input >> new_numerator;
+    // std::cout << "new numerator: " << new_numerator << std::endl;
+    // one number was entered
+    if (input.peek() == EOF)
+    {
+        throw std::invalid_argument("invalid input for a fraction");
+    }
+    int new_denominator;
+    input >> new_denominator;
+
+    if(new_denominator == 0 ) throw std::runtime_error("Denominator set to 0 - division by zero");
+    //check negatives
+    if(new_denominator < 0 && new_numerator < 0  ){ //both value are negative therefore the fraction, as a whole, is positive
+        new_numerator *= (-1);
+        new_denominator *= (-1);
+    }
+    if(new_denominator < 0 ){//only denominator was negative so we move the negative one to the numerator
+        new_denominator *= (-1);
+        new_numerator *= (-1);
+    }
+    std::cout<< new_numerator << " || " << new_denominator << std::endl;
+    _fraction._numerator = new_numerator;
+    _fraction._denominator = new_denominator;
     return input;
 }

@@ -9,7 +9,7 @@ private:
 public:
     Fraction(); // empty constructor will declare 0
     Fraction(int, int);
-    Fraction(double);
+    Fraction(float);
     // getters
     int getNumerator();
     int getDenominator();

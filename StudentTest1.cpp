@@ -218,23 +218,23 @@ TEST_CASE("Prefix and postfix decrement operators on Fraction class") {
     CHECK(c.getDenominator() == 2);
 }
 
-// TEST_CASE("Output and Input Stream Operators") {
-//     Fraction a(1, 2), b(3, 4);
-//     ostringstream os;
+TEST_CASE("Output and Input Stream Operators") {
+    Fraction a(1, 2), b(3, 4);
+    ostringstream os;
 
-//     // Test operator<<
-//     CHECK_NOTHROW(os << a); // Not thrwoing error
-//     CHECK(os.str() == "1/2"); // Prints well
+    // Test operator<<
+    CHECK_NOTHROW(os << a); // Not thrwoing error
+    CHECK(os.str() == "1/2"); // Prints well
 
-//     istringstream is("5 6"); // Could also be "5,6" for ex
-//     istringstream bad_is("7");
+    istringstream is("5 6"); // Could also be "5,6" for ex
+    istringstream bad_is("7");
 
-//     // Test operator>>
-//     CHECK_NOTHROW(is >> b);
-//     CHECK(b.getNumerator() == 5);
-//     CHECK(b.getDenominator() == 6);
-//     CHECK_THROWS(bad_is >> b); // Throws cuz the input is one number
-// }
+    // Test operator>>
+    CHECK_NOTHROW(is >> b);
+    CHECK(b.getNumerator() == 5);
+    CHECK(b.getDenominator() == 6);
+    CHECK_THROWS(bad_is >> b); // Throws cuz the input is one number
+}
 
 TEST_CASE("Rounding of float numbers during arithmetic operations with Fractions") {
     Fraction a(2, 5);
