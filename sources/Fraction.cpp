@@ -1,6 +1,9 @@
 #include "Fraction.hpp"
 #include <iostream>
 #include <iomanip>
+#include <limits>
+#include <bits/stdc++.h>
+
 /////////////////////////////////////////////////////////////////////////////////////////// constructors
 Fraction::Fraction()
 {
@@ -105,35 +108,60 @@ Fraction Fraction::decimalToFraction(double decicmalVal)
 
 Fraction Fraction::operator+(const Fraction &other) const
 {
-    // same denominator
-    if (this->_denominator == other._denominator)
+    // declare variable of long long type to check for overflow
+    long long new_numerator = (long long)this->_numerator * other._denominator + ((long long)this->_denominator * other._numerator),
+              new_denominator = (long long)this->_denominator * other._denominator;
+    // check maximum/minimum possible values for arithmetic operations
+    if (new_numerator > std::numeric_limits<int>::max() || new_numerator < std::numeric_limits<int>::min() ||
+        new_denominator > std::numeric_limits<int>::max() || new_denominator < std::numeric_limits<int>::min())
     {
-        return Fraction((this->_numerator + other._numerator), this->_denominator);
+        throw std::overflow_error("Requested arithmetic operation is beyond possible integer values. Aborting.");
     }
-    int new_numerator_1 = this->_numerator * other._denominator,
-        new_numerator_2 = this->_denominator * other._numerator,
-        new_denominator = this->_denominator * other._denominator;
-    return Fraction((new_numerator_1 + new_numerator_2), new_denominator);
+    return Fraction((int)(new_numerator), (int)new_denominator);
 }
 Fraction Fraction::operator-(const Fraction &other) const
 {
-    if (this->_denominator == other._denominator)
+    long long new_numerator = (long long)this->_numerator * (long long)other._denominator - ((long long)this->_denominator * (long long)other._numerator),
+        new_denominator = (long long)this->_denominator * (long long)other._denominator;
+    // check maximum/minimum possible values for arithmetic operations
+    if (new_numerator > std::numeric_limits<int>::max() || new_numerator < std::numeric_limits<int>::min() ||
+        new_denominator > std::numeric_limits<int>::max() || new_denominator < std::numeric_limits<int>::min())
     {
-        return Fraction((this->_numerator - other._numerator), this->_denominator);
+        throw std::overflow_error("Requested arithmetic operation is beyond possible integer values. Aborting.");
     }
-    int new_numerator_1 = this->_numerator * other._denominator, // lvalue
-        new_numerator_2 = this->_denominator * other._numerator, // rvalue
-        new_denominator = this->_denominator * other._denominator;
-    return Fraction((new_numerator_1 - new_numerator_2), new_denominator);
+    return Fraction((int)(new_numerator), (int)new_denominator);
 }
-Fraction Fraction::operator*(const Fraction &other) const { return Fraction((this->_numerator * other._numerator), (this->_denominator * other._denominator)); }
-Fraction Fraction::operator/(const Fraction &other) const 
-{ 
-    if(other._numerator == 0){
+
+Fraction Fraction::operator*(const Fraction &other) const
+{
+    long long new_numerator = (long long)this->_numerator * other._numerator,
+              new_denominator = (long long)this->_denominator * other._denominator;
+    if (new_numerator > std::numeric_limits<int>::max() || new_numerator < std::numeric_limits<int>::min() ||
+        new_denominator > std::numeric_limits<int>::max() || new_denominator < std::numeric_limits<int>::min())
+    {
+        throw std::overflow_error("Requested arithmetic operation is beyond possible integer values. Aborting.");
+    }
+    return Fraction((int)(new_numerator), (int)(new_denominator));
+}
+
+Fraction Fraction::operator/(const Fraction &other) const
+{
+    // check division by 0
+    if (other._numerator == 0)
+    {
         throw std::runtime_error("division by 0");
     }
-    return Fraction((this->_numerator * other._denominator), (this->_denominator * other._numerator)); 
+    long long new_numerator = (long long)this->_numerator * other._denominator,
+              new_denominator = (long long)this->_denominator * other._numerator;
+
+    // check maximum/minimum possible values for arithmetic operations
+    if (new_numerator > std::numeric_limits<int>::max() || new_numerator < std::numeric_limits<int>::min() ||
+        new_denominator > std::numeric_limits<int>::max() || new_denominator < std::numeric_limits<int>::min())
+    {
+        throw std::overflow_error("Requested arithmetic operation is beyond possible integer values. Aborting.");
     }
+    return Fraction((int)(new_numerator), (int)(new_denominator));
+}
 
 // prefix
 Fraction &Fraction::operator++()
@@ -164,29 +192,30 @@ Fraction Fraction::operator--(int dummy_flag)
 Fraction Fraction::operator+(float decimalNum) const { return *this + Fraction(decimalNum); }
 Fraction Fraction::operator-(float decimalNum) const { return *this - Fraction(decimalNum); }
 Fraction Fraction::operator*(float decimalNum) const { return *this * Fraction(decimalNum); }
-Fraction Fraction::operator/(float decimalNum) const 
-{ 
-    if(decimalNum == 0) throw std::runtime_error("Division by 0");
-    return *this / Fraction(decimalNum); 
-    }
+Fraction Fraction::operator/(float decimalNum) const
+{
+    if (decimalNum == 0)
+        throw std::runtime_error("Division by 0");
+    return *this / Fraction(decimalNum);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // comparison operators between Fractions
-bool Fraction::operator==(const Fraction &other) const 
-{ 
+bool Fraction::operator==(const Fraction &other) const
+{
     float _fraction1 = ((float)this->_numerator / this->_denominator) * 1000;
     _fraction1 = (int)_fraction1;
-    _fraction1 = (float)_fraction1/1000;
+    _fraction1 = (float)_fraction1 / 1000;
     float _fraction2 = ((float)other._numerator / other._denominator) * 1000;
     _fraction2 = (int)_fraction2;
-    _fraction2 = (float)_fraction2/1000;
+    _fraction2 = (float)_fraction2 / 1000;
     // double _rounding = (double)std::abs(_fraction1 - _fraction2);
     // if(_rounding> 0.001){
     //     std::cout<< "rounding: " << _rounding << std::endl;
     // }
-    return(std::abs(_fraction1 - _fraction2) <= 0.001);
+    return (std::abs(_fraction1 - _fraction2) <= 0.001);
     // return (_rounding<=(float)0.001);
     // return(_fraction1 == _fraction2);
 }
@@ -255,17 +284,20 @@ std::istream &operator>>(std::istream &input, Fraction &_fraction)
     int new_denominator;
     input >> new_denominator;
 
-    if(new_denominator == 0 ) throw std::runtime_error("Denominator set to 0 - division by zero");
-    //check negatives
-    if(new_denominator < 0 && new_numerator < 0  ){ //both value are negative therefore the fraction, as a whole, is positive
+    if (new_denominator == 0)
+        throw std::runtime_error("Denominator set to 0 - division by zero");
+    // check negatives
+    if (new_denominator < 0 && new_numerator < 0)
+    { // both value are negative therefore the fraction, as a whole, is positive
         new_numerator *= (-1);
         new_denominator *= (-1);
     }
-    if(new_denominator < 0 ){//only denominator was negative so we move the negative one to the numerator
+    if (new_denominator < 0)
+    { // only denominator was negative so we move the negative one to the numerator
         new_denominator *= (-1);
         new_numerator *= (-1);
     }
-    std::cout<< new_numerator << " || " << new_denominator << std::endl;
+    // std::cout << new_numerator << " || " << new_denominator << std::endl;
     _fraction._numerator = new_numerator;
     _fraction._denominator = new_denominator;
     return input;

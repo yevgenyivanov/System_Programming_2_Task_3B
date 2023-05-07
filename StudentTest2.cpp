@@ -713,6 +713,7 @@ TEST_CASE("Fraction with largest possible numerator and/or denominator and overf
     int max_int = std::numeric_limits<int>::max();
     int min_int = std::numeric_limits<int>::min();
 
+    
     // Test largest possible numerator
     CHECK_NOTHROW(Fraction f1(max_int, 1));
     Fraction f1(max_int, 1);
