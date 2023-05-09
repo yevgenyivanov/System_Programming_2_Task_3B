@@ -1,8 +1,8 @@
 #!make -f
 
-CXX=clang++-14
+CXX=clang++
 CXXVERSION=c++2a
-TIDY=clang-tidy-14
+TIDY=clang-tidy
 SOURCE_PATH=sources
 OBJECT_PATH=objects
 CXXFLAGS=-std=$(CXXVERSION) -Werror -Wsign-conversion -I$(SOURCE_PATH)
